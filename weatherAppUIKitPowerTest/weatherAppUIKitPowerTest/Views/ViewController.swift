@@ -39,6 +39,15 @@ class ViewController: UIViewController {
         return label
     }()
     
+    private let todayLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Today"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textColor = .white
+        return label
+    }()
+    
     private let hourlyScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -47,6 +56,30 @@ class ViewController: UIViewController {
     }()
 
     private let hourlyStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 12
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
+    private let tomorrowLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Tomorrow"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textColor = .white
+        return label
+    }()
+    
+    private let tomorrowScrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsHorizontalScrollIndicator = false
+        return scrollView
+    }()
+
+    private let tomorrowStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = 12
@@ -93,8 +126,12 @@ class ViewController: UIViewController {
         view.addSubview(locationLabel)
         view.addSubview(temperatureLabel)
         view.addSubview(conditionLabel)
+        view.addSubview(todayLabel)
         view.addSubview(hourlyScrollView)
         hourlyScrollView.addSubview(hourlyStackView)
+        view.addSubview(tomorrowLabel)
+        view.addSubview(tomorrowScrollView)
+        tomorrowScrollView.addSubview(tomorrowStackView)
         view.addSubview(dailyStackView)
         view.addSubview(refreshButton)
 
@@ -108,9 +145,12 @@ class ViewController: UIViewController {
             conditionLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             conditionLabel.topAnchor.constraint(equalTo: temperatureLabel.bottomAnchor, constant: 8),
             
+            todayLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            todayLabel.topAnchor.constraint(equalTo: conditionLabel.bottomAnchor, constant: 12),
+            
             hourlyScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             hourlyScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            hourlyScrollView.topAnchor.constraint(equalTo: conditionLabel.bottomAnchor, constant: 20),
+            hourlyScrollView.topAnchor.constraint(equalTo: todayLabel.bottomAnchor, constant: 8),
             hourlyScrollView.heightAnchor.constraint(equalToConstant: 100),
 
             hourlyStackView.leadingAnchor.constraint(equalTo: hourlyScrollView.leadingAnchor, constant: 16),
@@ -119,9 +159,23 @@ class ViewController: UIViewController {
             hourlyStackView.bottomAnchor.constraint(equalTo: hourlyScrollView.bottomAnchor),
             hourlyStackView.heightAnchor.constraint(equalTo: hourlyScrollView.heightAnchor),
             
+            tomorrowLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tomorrowLabel.topAnchor.constraint(equalTo: hourlyScrollView.bottomAnchor, constant: 20),
+            
+            tomorrowScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tomorrowScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tomorrowScrollView.topAnchor.constraint(equalTo: tomorrowLabel.bottomAnchor, constant: 8),
+            tomorrowScrollView.heightAnchor.constraint(equalToConstant: 100),
+
+            tomorrowStackView.leadingAnchor.constraint(equalTo: tomorrowScrollView.leadingAnchor, constant: 16),
+            tomorrowStackView.trailingAnchor.constraint(equalTo: tomorrowScrollView.trailingAnchor, constant: -16),
+            tomorrowStackView.topAnchor.constraint(equalTo: tomorrowScrollView.topAnchor),
+            tomorrowStackView.bottomAnchor.constraint(equalTo: tomorrowScrollView.bottomAnchor),
+            tomorrowStackView.heightAnchor.constraint(equalTo: tomorrowScrollView.heightAnchor),
+            
             dailyStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             dailyStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            dailyStackView.topAnchor.constraint(equalTo: hourlyScrollView.bottomAnchor, constant: 24),
+            dailyStackView.topAnchor.constraint(equalTo: tomorrowScrollView.bottomAnchor, constant: 24),
             
             refreshButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             refreshButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
@@ -163,6 +217,14 @@ class ViewController: UIViewController {
                         let view = self.makeHourlyView(hour: hour)
                         self.hourlyStackView.addArrangedSubview(view)
                     }
+                }
+                
+                self.tomorrowStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+                let tomorrowHours = weather.forecast.forecastday.dropFirst().first?.hour ?? []
+                for hour in tomorrowHours {
+                    let view = self.makeHourlyView(hour: hour)
+                    self.tomorrowStackView.addArrangedSubview(view)
                 }
                 
                 self.dailyStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
